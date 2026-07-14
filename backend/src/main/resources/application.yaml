@@ -11,18 +11,28 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   jackson:
     serialization:
       write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
-  secret: ${JWT_SECRET:change-me-please}
+  secret: ${JWT_SECRET:ebop-super-secret-key-change-in-production-min-32-chars}
   expiration: ${JWT_EXPIRATION:3600000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
@@ -30,7 +40,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,flyway
   endpoint:
     health:
       show-details: always
@@ -40,10 +50,14 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
 
 logging:
   level:
-    org.springframework.security: INFO
-    org.hibernate.SQL: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.flywaydb: INFO
+    com.example.bop: INFO
   pattern:
-    console: '{"timestamp":"%d{ISO8601}","level":"%p","logger":"%c","message":"%m"}%n'
+    console: '%d{ISO8601} [%t] %-5p %c{1} - %m%n'
